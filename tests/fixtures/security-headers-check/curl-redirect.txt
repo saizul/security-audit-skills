@@ -1,0 +1,11 @@
+HTTP/1.1 301 Moved Permanently
+Server: nginx
+Location: https://www.example.com/
+
+HTTP/2 200
+content-type: text/html
+strict-transport-security: max-age=86400
+content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:
+x-frame-options: SAMEORIGIN
+x-content-type-options: nosniff
+referrer-policy: unsafe-url

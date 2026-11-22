@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Release artifacts (built by .github/workflows/release.yml)
+dist/
+
+# Inputs you may capture while using the skills: they contain cookies, tokens or findings
+*.har
+secrets.json
+.secrets-baseline.json
+incidents/
+*-audit.json
+.env
+.env.*
+!.env.example
+# ...but keep the test fixtures
+!tests/fixtures/**
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store

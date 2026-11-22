@@ -1,0 +1,31 @@
+{
+  "advisories": {
+    "example/http": [
+      {
+        "advisoryId": "PKSA-test-0001",
+        "packageName": "example/http",
+        "affectedVersions": ">=1.0.0,<1.8.2",
+        "title": "Header injection in example/http",
+        "cve": "CVE-0000-00020",
+        "link": "https://github.com/advisories/GHSA-test-0000-0020",
+        "reportedAt": "2026-01-01T00:00:00+00:00",
+        "sources": [{"name": "GitHub", "remoteId": "GHSA-test-0000-0020"}],
+        "severity": "high"
+      }
+    ],
+    "example/markdown": [
+      {
+        "advisoryId": "PKSA-test-0002",
+        "packageName": "example/markdown",
+        "affectedVersions": "<2.0.0",
+        "title": "XSS in example/markdown",
+        "cve": null,
+        "link": "https://example.com/advisory",
+        "reportedAt": "2026-02-01T00:00:00+00:00",
+        "sources": [],
+        "severity": "medium"
+      }
+    ]
+  },
+  "abandoned": {"example/old-mailer": "example/mailer", "example/unmaintained": null}
+}

@@ -1,0 +1,1 @@
+{"elements": [{"id": "a", "type": "process"}], "flows": [{"from": "a", "to": "missing"}]}

@@ -1,0 +1,14 @@
+{
+  "dependencies": [
+    {"name": "example-web", "version": "2.0.1", "vulns": [
+      {"id": "PYSEC-0000-1", "fix_versions": ["2.0.3", "2.1.0"], "aliases": ["CVE-0000-00001", "GHSA-test-0000-0005"],
+       "description": "Open redirect in example-web when ...\nMore detail."}
+    ]},
+    {"name": "example-yaml", "version": "5.3", "vulns": [
+      {"id": "PYSEC-0000-2", "fix_versions": [], "aliases": [], "description": "Unsafe load"}
+    ]},
+    {"name": "example-ok", "version": "1.0", "vulns": []},
+    {"name": "local-pkg", "skip_reason": "Dependency not found on PyPI and could not be audited"}
+  ],
+  "fixes": []
+}

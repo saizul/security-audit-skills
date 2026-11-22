@@ -1,0 +1,28 @@
+{
+  "actions": [],
+  "advisories": {
+    "1000010": {
+      "id": 1000010,
+      "module_name": "example-legacy",
+      "severity": "high",
+      "title": "Command injection in example-legacy",
+      "url": "https://npmjs.com/advisories/1000010",
+      "vulnerable_versions": "<3.0.1",
+      "patched_versions": ">=3.0.1",
+      "cves": ["CVE-0000-00010"],
+      "findings": [{"version": "2.9.0", "paths": ["example-legacy"]}]
+    },
+    "1000011": {
+      "id": 1000011,
+      "module_name": "example-old",
+      "severity": "low",
+      "title": "Information exposure in example-old",
+      "url": "https://npmjs.com/advisories/1000011",
+      "vulnerable_versions": ">=0.0.0",
+      "patched_versions": "<0.0.0",
+      "cves": [],
+      "findings": [{"version": "0.4.0", "paths": ["a>example-old"]}]
+    }
+  },
+  "metadata": {"vulnerabilities": {"low": 1, "high": 1}}
+}

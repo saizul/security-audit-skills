@@ -1,0 +1,9 @@
+HTTP/2 200
+date: Sun, 22 Nov 2026 10:00:00 GMT
+content-type: text/html; charset=utf-8
+set-cookie: PHPSESSID=abc123fakevalue; path=/
+set-cookie: remember_me=fakevalue; Max-Age=31536000; Path=/; Secure; HttpOnly; SameSite=Lax
+set-cookie: __Host-sid=fakevalue; Path=/app; Secure; HttpOnly; SameSite=Strict
+set-cookie: csrftoken=fakevalue; Path=/; Secure; SameSite=Lax
+set-cookie: tracking=fakevalue; SameSite=None
+set-cookie: auth=deleted; Max-Age=0; Path=/

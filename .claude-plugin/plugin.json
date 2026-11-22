@@ -1,0 +1,14 @@
+{
+  "name": "security-audit-skills",
+  "displayName": "Security Audit Skills",
+  "version": "0.1.0",
+  "description": "Defensive application security Agent Skills: secrets scan, dependency audit, OWASP Top 10 review, STRIDE threat modeling, auth/session/JWT review, security headers, injection review, Dockerfile security and incident response.",
+  "author": {
+    "name": "Saizul Amin",
+    "url": "https://github.com/saizul"
+  },
+  "homepage": "https://github.com/saizul/security-audit-skills",
+  "repository": "https://github.com/saizul/security-audit-skills",
+  "license": "MIT",
+  "keywords": ["security", "appsec", "owasp", "secrets", "secret-scanning", "threat-modeling", "stride", "jwt", "docker", "code-review"]
+}

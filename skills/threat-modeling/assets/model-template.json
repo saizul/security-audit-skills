@@ -1,0 +1,18 @@
+{
+  "system": "Example shop",
+  "elements": [
+    {"id": "customer", "type": "external", "name": "Customer browser"},
+    {"id": "psp", "type": "external", "name": "Payment provider", "zone": "third-party"},
+    {"id": "web", "type": "process", "name": "Web/API", "zone": "dmz", "internet_facing": true},
+    {"id": "worker", "type": "process", "name": "Order worker", "zone": "internal"},
+    {"id": "db", "type": "store", "name": "Postgres", "zone": "internal", "data": ["pii", "credentials"]},
+    {"id": "cache", "type": "store", "name": "Redis", "zone": "internal", "encrypted_at_rest": false}
+  ],
+  "flows": [
+    {"from": "customer", "to": "web", "name": "Browse and checkout", "protocol": "https", "authenticated": true, "data": ["credentials", "pii"]},
+    {"from": "web", "to": "db", "name": "SQL queries", "protocol": "postgres-tls", "data": ["pii"]},
+    {"from": "web", "to": "cache", "name": "Sessions", "protocol": "redis"},
+    {"from": "psp", "to": "web", "name": "Payment webhook", "protocol": "https", "authenticated": false, "data": ["payment"]},
+    {"from": "web", "to": "worker", "name": "Order jobs", "protocol": "amqp"}
+  ]
+}

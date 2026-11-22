@@ -1,0 +1,94 @@
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "example-parser": {
+      "name": "example-parser",
+      "severity": "critical",
+      "isDirect": true,
+      "via": [
+        {
+          "source": 1000001,
+          "name": "example-parser",
+          "dependency": "example-parser",
+          "title": "Prototype pollution in example-parser",
+          "url": "https://github.com/advisories/GHSA-test-0000-0001",
+          "severity": "critical",
+          "cwe": ["CWE-1321"],
+          "range": "<2.1.0"
+        }
+      ],
+      "effects": ["example-cli"],
+      "range": "<2.1.0",
+      "nodes": ["node_modules/example-parser"],
+      "fixAvailable": {"name": "example-parser", "version": "2.1.0", "isSemVerMajor": false}
+    },
+    "example-cli": {
+      "name": "example-cli",
+      "severity": "critical",
+      "isDirect": false,
+      "via": ["example-parser"],
+      "effects": [],
+      "range": "1.0.0 - 1.4.2",
+      "nodes": ["node_modules/example-cli"],
+      "fixAvailable": true
+    },
+    "example-template": {
+      "name": "example-template",
+      "severity": "high",
+      "isDirect": true,
+      "via": [
+        {
+          "source": 1000002,
+          "name": "example-template",
+          "title": "Template injection in example-template",
+          "url": "https://github.com/advisories/GHSA-test-0000-0002",
+          "severity": "high",
+          "range": "<5.0.0"
+        }
+      ],
+      "effects": [],
+      "range": "<5.0.0",
+      "nodes": ["node_modules/example-template"],
+      "fixAvailable": {"name": "example-template", "version": "5.0.0", "isSemVerMajor": true}
+    },
+    "example-regex": {
+      "name": "example-regex",
+      "severity": "moderate",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1000003,
+          "name": "example-regex",
+          "title": "ReDoS in example-regex",
+          "url": "https://github.com/advisories/GHSA-test-0000-0003",
+          "severity": "moderate",
+          "range": "<1.2.3"
+        }
+      ],
+      "effects": [],
+      "range": "<1.2.3",
+      "nodes": ["node_modules/example-regex"],
+      "fixAvailable": false
+    },
+    "example-log": {
+      "name": "example-log",
+      "severity": "high",
+      "isDirect": false,
+      "via": [
+        {
+          "source": 1000004,
+          "name": "example-log",
+          "title": "Log injection in example-log",
+          "url": "https://github.com/advisories/GHSA-test-0000-0004",
+          "severity": "high",
+          "range": "*"
+        }
+      ],
+      "effects": [],
+      "range": "*",
+      "nodes": ["node_modules/example-log"],
+      "fixAvailable": false
+    }
+  },
+  "metadata": {"vulnerabilities": {"info": 0, "low": 0, "moderate": 1, "high": 2, "critical": 2, "total": 5}}
+}

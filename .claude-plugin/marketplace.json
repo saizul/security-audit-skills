@@ -1,0 +1,28 @@
+{
+  "name": "security-audit-skills",
+  "description": "Defensive application security Agent Skills for reviewing your own code.",
+  "owner": {
+    "name": "Saizul Amin",
+    "url": "https://github.com/saizul"
+  },
+  "plugins": [
+    {
+      "name": "security-audit-skills",
+      "source": "./",
+      "description": "Secrets scan, dependency audit triage, OWASP Top 10 review, STRIDE threat modeling, auth/session and JWT review, security headers grading, injection review, Dockerfile linting and incident response playbooks.",
+      "category": "security",
+      "tags": ["security", "appsec", "owasp", "secrets", "threat-modeling", "jwt", "docker", "code-review"],
+      "skills": [
+        "./skills/secrets-scan",
+        "./skills/dependency-audit",
+        "./skills/owasp-web-review",
+        "./skills/threat-modeling",
+        "./skills/auth-session-review",
+        "./skills/security-headers-check",
+        "./skills/input-validation-review",
+        "./skills/dockerfile-security",
+        "./skills/incident-response-playbook"
+      ]
+    }
+  ]
+}
