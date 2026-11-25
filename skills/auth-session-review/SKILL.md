@@ -55,7 +55,9 @@ Use a test account on a non-production environment where possible.
    python3 scripts/jwt_lint.py --file token.txt --json --max-hours 1
    ```
    It decodes without verifying and prints only alg/typ/kid, iss/aud/time claims and the names
-   of other claims. Then read the **verification** code: the algorithm must be pinned, the key
+   of other claims. It also flags `iat`/`nbf` in the future beyond `--leeway` seconds (issuer
+   clock skew, default 300) and `exp` at or before `iat`/`nbf` (often milliseconds vs seconds).
+   Then read the **verification** code: the algorithm must be pinned, the key
    must come from server config (never from the token's `jku`/`jwk`/`x5u`), `exp`, `nbf`, `iss`
    and `aud` must be checked, and `alg: none` must be rejected.
 5. **Prioritise**: account takeover paths first (reset flaws, missing throttling, session
