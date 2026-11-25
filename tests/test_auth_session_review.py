@@ -168,3 +168,24 @@ def test_jwt_cli_never_prints_signature_or_values(tmp_path):
     assert run_script(SKILL, "jwt_lint.py", "--file", str(f), "--fail-on", "none").returncode == 0
     assert run_script(SKILL, "jwt_lint.py", stdin="not-a-token").returncode == 2
     assert run_script(SKILL, "jwt_lint.py", "--help").returncode == 0
+
+
+def test_future_iat_and_nbf_beyond_leeway():
+    found = lint({"alg": "RS256"}, dict(GOOD_PAYLOAD, iat=NOW + 3600, nbf=NOW + 3600, exp=NOW + 4000))
+    assert {("iat-future", "low"), ("nbf-future", "low")} <= found
+    within = lint({"alg": "RS256"}, dict(GOOD_PAYLOAD, iat=NOW + 120))
+    assert not any(check.endswith("-future") for check, _ in within)
+
+
+def test_exp_before_start():
+    # exp written in seconds but iat in milliseconds: the token is never valid
+    found = lint({"alg": "RS256"}, dict(GOOD_PAYLOAD, iat=(NOW - 60) * 1000))
+    assert ("exp-before-start", "medium") in found
+
+
+def test_jwt_cli_leeway_option():
+    token = make_token({"alg": "RS256"}, dict(GOOD_PAYLOAD, iat=NOW + 600))
+    strict = run_script(SKILL, "jwt_lint.py", "--now", str(NOW), "--json", stdin=token)
+    assert "iat-future" in {f["check"] for f in json.loads(strict.stdout)["findings"]}
+    loose = run_script(SKILL, "jwt_lint.py", "--now", str(NOW), "--json", "--leeway", "900", stdin=token)
+    assert "iat-future" not in {f["check"] for f in json.loads(loose.stdout)["findings"]}

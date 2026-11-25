@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `auth-session-review`: `jwt_lint.py` reports `iat-future`/`nbf-future` when a time claim is
+  ahead of the clock by more than `--leeway` seconds (default 300), and `exp-before-start` when
+  `exp` is not after `iat`/`nbf`.
+
 ## [0.1.0] - 2026-11-22
 
 ### Added

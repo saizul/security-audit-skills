@@ -8,7 +8,8 @@ The signature and other claim values are never printed.
 
 Checks: alg "none", symmetric HS* algorithms (shared secret strength and algorithm
 pinning), embedded key headers (jwk/jku/x5u/x5c), suspicious kid, missing or long exp,
-missing iat/iss/aud, already expired, and sensitive data in claims (payloads are only
+missing iat/iss/aud, already expired, iat/nbf in the future (issuer clock skew),
+exp at or before iat/nbf (a token that can never be valid), and sensitive data in claims (payloads are only
 base64url-encoded, not encrypted).
 
 Exit codes: 0 = nothing at or above --fail-on, 1 = findings, 2 = not a JWT / error.
@@ -55,7 +56,9 @@ def decode(token: str) -> tuple[dict, dict, int]:
     return header, payload, len(parts[2])
 
 
-def lint(header: dict, payload: dict, sig_len: int, now: float, max_hours: float) -> list[dict]:
+def lint(
+    header: dict, payload: dict, sig_len: int, now: float, max_hours: float, *, leeway: float = 300.0
+) -> list[dict]:
     out: list[dict] = []
 
     def add(sev, check, msg, fix):
@@ -111,6 +114,25 @@ def lint(header: dict, payload: dict, sig_len: int, now: float, max_hours: float
                 f"lifetime is {hours:.1f} h (limit {max_hours:g} h)",
                 "keep access tokens short-lived and use refresh tokens with rotation and revocation",
             )
+    for claim, value in (("iat", iat), ("nbf", nbf)):
+        if isinstance(value, (int, float)) and value > now + leeway:
+            add(
+                "low",
+                f"{claim}-future",
+                f"{claim} is {value - now:.0f} s in the future (leeway {leeway:g} s)",
+                "sync the issuer clock with NTP; verifiers should allow only a small leeway",
+            )
+    if isinstance(exp, (int, float)):
+        starts = [(c, v) for c, v in (("iat", iat), ("nbf", nbf)) if isinstance(v, (int, float))]
+        for claim, value in starts:
+            if exp <= value:
+                add(
+                    "medium",
+                    "exp-before-start",
+                    f"exp is not after {claim}: the token can never be valid",
+                    "compute exp as issue time + lifetime, in seconds (not milliseconds)",
+                )
+                break
     if not isinstance(iat, (int, float)):
         add("low", "iat", "no iat claim", "set iat so lifetimes and revocation-by-time can be checked")
     if "iss" not in payload:
@@ -158,6 +180,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--json", action="store_true", help="print JSON")
     p.add_argument("--max-hours", type=float, default=24.0, help="longest acceptable lifetime (default 24)")
     p.add_argument("--now", type=float, help="current Unix time (for reproducible checks)")
+    p.add_argument(
+        "--leeway", type=float, default=300.0, help="allowed clock skew in seconds for iat/nbf (default 300)"
+    )
     p.add_argument("--fail-on", choices=SEVERITIES + ["none"], default="medium")
     args = p.parse_args(argv)
     try:
@@ -170,7 +195,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error: {exc}", file=sys.stderr)
         return 2
     now = args.now if args.now is not None else time.time()
-    findings = lint(header, payload, sig_len, now, args.max_hours)
+    findings = lint(header, payload, sig_len, now, args.max_hours, leeway=args.leeway)
     findings.sort(key=lambda x: -SEVERITIES.index(x["severity"]))
     info = summary(header, payload)
     if args.json:
