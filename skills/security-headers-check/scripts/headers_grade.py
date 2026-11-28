@@ -6,9 +6,11 @@ Input: a HAR export, or raw response headers (one or more responses, e.g. from
 In a HAR, only HTML documents are graded unless --all is given.
 
 Checks: Strict-Transport-Security, Content-Security-Policy quality (unsafe-inline,
-unsafe-eval, wildcards, object-src, base-uri, frame-ancestors), X-Frame-Options,
+unsafe-eval, wildcards, object-src, base-uri, frame-ancestors incl. wildcards that allow
+any site to frame the page), X-Frame-Options (missing or invalid values),
 X-Content-Type-Options, Referrer-Policy, Permissions-Policy, Cross-Origin-Opener-Policy,
-version-revealing Server / X-Powered-By, permissive CORS, deprecated X-XSS-Protection.
+version-revealing Server / X-Powered-By, permissive CORS, deprecated X-XSS-Protection,
+and single-value headers sent several times with different values (proxy + app both set them).
 
 Score starts at 100: high -25, medium -10, low -5, info 0.
 Grades: A >= 90, B >= 80, C >= 70, D >= 60, else F.
@@ -26,6 +28,15 @@ from pathlib import Path
 PENALTY = {"high": 25, "medium": 10, "low": 5, "info": 0}
 GRADES = ["A", "B", "C", "D", "F"]
 VERSION_RE = re.compile(r"\d+\.\d+")
+WILDCARD_SOURCES = ("*", "http:", "https:", "data:")
+# Headers that take one value: a second, different copy is ignored or breaks the policy.
+SINGLE_VALUE = (
+    "strict-transport-security",
+    "x-frame-options",
+    "x-content-type-options",
+    "referrer-policy",
+    "cross-origin-opener-policy",
+)
 
 
 def grade(score: int) -> str:
@@ -85,8 +96,19 @@ def parse_csp(value: str) -> dict:
 
 
 def check_csp(value: str, add) -> bool:
-    """Return True if the CSP sets frame-ancestors."""
+    """Return True if the CSP sets frame-ancestors (browsers then ignore X-Frame-Options)."""
     d = parse_csp(value)
+    ancestors = d.get("frame-ancestors")
+    if ancestors is not None:
+        wild = [t for t in ancestors if t in WILDCARD_SOURCES]
+        if wild:
+            add(
+                "medium",
+                "csp",
+                f"frame-ancestors allows {' '.join(wild)}: any site can frame the page "
+                "(X-Frame-Options is then ignored)",
+                "frame-ancestors 'self' (plus the exact origins that may embed the page)",
+            )
     script = d.get("script-src", d.get("default-src"))
     if script is None:
         add("medium", "csp", "CSP has neither script-src nor default-src", "add default-src 'self'")
@@ -193,6 +215,24 @@ def evaluate(resp: dict, https: bool) -> dict:
         )
     elif xfo and xfo.strip().upper().startswith("ALLOW-FROM"):
         add("low", "x-frame-options", "ALLOW-FROM is ignored by modern browsers", "use CSP frame-ancestors")
+    elif xfo and not frame_ancestors and xfo.strip().upper() not in ("DENY", "SAMEORIGIN"):
+        add(
+            "medium",
+            "x-frame-options",
+            f"X-Frame-Options '{xfo[:40]}' is not DENY or SAMEORIGIN, so browsers ignore it",
+            "X-Frame-Options: DENY (or SAMEORIGIN), or CSP frame-ancestors 'self'",
+        )
+
+    for name in SINGLE_VALUE:
+        values = h.get(name) or []
+        distinct = {" ".join(v.lower().split()) for v in values}
+        if len(distinct) > 1:
+            add(
+                "low",
+                name,
+                f"sent {len(values)} times with different values ({' | '.join(v[:30] for v in values[:3])})",
+                "set it in one place only (proxy or app); for nginx add_header, check inherited blocks",
+            )
 
     xcto = first("x-content-type-options")
     if not xcto or xcto.strip().lower() != "nosniff":

@@ -117,3 +117,50 @@ def test_cli(tmp_path):
     bad.write_text("{oops")
     assert run_script(SKILL, SCRIPT, str(bad)).returncode == 2
     assert run_script(SKILL, SCRIPT, "--help").returncode == 0
+
+
+GOOD_BASE = (
+    "HTTP/2 200\n"
+    "strict-transport-security: max-age=31536000; includeSubDomains\n"
+    "x-content-type-options: nosniff\n"
+    "referrer-policy: strict-origin-when-cross-origin\n"
+    "permissions-policy: camera=()\n"
+    "cross-origin-opener-policy: same-origin\n"
+)
+
+
+def test_frame_ancestors_wildcard_is_not_protection():
+    text = (
+        GOOD_BASE
+        + "content-security-policy: default-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors *\nx-frame-options: DENY\n"
+    )
+    res = grade_text(text)
+    msgs = [f["message"] for f in res["findings"]]
+    assert any("frame-ancestors allows *" in m for m in msgs)
+    assert res["score"] == 90
+
+
+def test_invalid_x_frame_options_value():
+    text = (
+        GOOD_BASE
+        + "content-security-policy: default-src 'self'; object-src 'none'; base-uri 'self'\nx-frame-options: ALLOWALL\n"
+    )
+    res = grade_text(text)
+    xfo = [f for f in res["findings"] if f["header"] == "x-frame-options"]
+    assert len(xfo) == 1 and xfo[0]["severity"] == "medium" and "ignore" in xfo[0]["message"]
+    ok = (
+        GOOD_BASE
+        + "content-security-policy: default-src 'self'; object-src 'none'; base-uri 'self'\nx-frame-options: sameorigin\n"
+    )
+    assert not [f for f in grade_text(ok)["findings"] if f["header"] == "x-frame-options"]
+
+
+def test_conflicting_duplicate_headers():
+    text = (
+        GOOD_BASE
+        + "content-security-policy: default-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'\n"
+        + "x-frame-options: DENY\nx-frame-options: SAMEORIGIN\nx-content-type-options: nosniff\n"
+    )
+    res = grade_text(text)
+    dup = [(f["header"], f["severity"]) for f in res["findings"] if "different values" in f["message"]]
+    assert dup == [("x-frame-options", "low")]  # identical nosniff copies are fine
