@@ -8,6 +8,11 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `security-headers-check`: `headers_grade.py` reports CSP `frame-ancestors` with `*`,
+  `http:`, `https:` or `data:` (medium; it also overrides X-Frame-Options), X-Frame-Options
+  values other than DENY/SAMEORIGIN (medium, ignored by browsers), and single-value headers
+  (HSTS, X-Frame-Options, nosniff, Referrer-Policy, COOP) sent several times with different
+  values (low).
 - `auth-session-review`: `jwt_lint.py` reports `iat-future`/`nbf-future` when a time claim is
   ahead of the clock by more than `--leeway` seconds (default 300), and `exp-before-start` when
   `exp` is not after `iat`/`nbf`.

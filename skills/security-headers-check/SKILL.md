@@ -1,6 +1,6 @@
 ---
 name: security-headers-check
-description: Grade the HTTP security headers of your own site or API from a HAR file or curl -I output, offline - HSTS, Content-Security-Policy quality (unsafe-inline, unsafe-eval, wildcards, object-src, base-uri, frame-ancestors, report-only), X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, version-leaking Server/X-Powered-By, permissive CORS and legacy X-XSS-Protection - with an A-F grade and copy-paste fixes for nginx, Apache, Express, Django, Laravel and Next.js. Use when the user asks to check or improve security headers, add a CSP, fix a securityheaders.com or Mozilla Observatory grade, harden a site before launch, or review CORS headers.
+description: Grade the HTTP security headers of your own site or API from a HAR file or curl -I output, offline - HSTS, Content-Security-Policy quality (unsafe-inline, unsafe-eval, wildcards, object-src, base-uri, frame-ancestors wildcards, report-only), X-Frame-Options values, conflicting duplicate headers, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, version-leaking Server/X-Powered-By, permissive CORS and legacy X-XSS-Protection - with an A-F grade and copy-paste fixes for nginx, Apache, Express, Django, Laravel and Next.js. Use when the user asks to check or improve security headers, add a CSP, fix a securityheaders.com or Mozilla Observatory grade, harden a site before launch, or review CORS headers.
 license: MIT
 compatibility: Python 3.8+ standard library. curl to capture headers (the script itself makes no network calls).
 metadata:
@@ -44,7 +44,11 @@ Paths below are relative to this skill's folder (in Claude Code: `${CLAUDE_SKILL
    ```
    With redirects the last response is graded (`--all` for each hop). Raw headers are treated
    as HTTPS unless `--http`. Exit 1 = a response below `--min-grade` (default B).
-3. **Interpret.** HSTS, clickjacking protection, CSP and CORS matter most. Info items
+3. **Interpret.** HSTS, clickjacking protection, CSP and CORS matter most. A CSP
+   `frame-ancestors *` (or `https:`) overrides `X-Frame-Options`, so the page can be
+   framed by anyone even with `X-Frame-Options: DENY`; values other than `DENY` /
+   `SAMEORIGIN` are ignored too. "Sent N times with different values" usually means the
+   proxy and the app both add the header: keep one. Info items
    (Permissions-Policy, COOP) are hardening. API-only JSON responses need fewer headers
    (nosniff, CORS, cache control); CSP matters for HTML.
 4. **Write the fix** for the user's stack from
